@@ -1,0 +1,27 @@
+# .streamlit/config.toml
+# Streamlit Cloud deployment configuration
+
+[server]
+# Disable file watcher to prevent crashes on cloud
+enableStaticServing = true
+fileWatcherType = "none"
+
+# Increase max upload size for bulk CSV
+maxUploadSize = 200
+
+[browser]
+# Improve performance
+gatherUsageStats = false
+
+[theme]
+# Optional: custom theme
+primaryColor = "#2563eb"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f8fafc"
+textColor = "#1e293b"
+font = "sans serif"
+
+[runner]
+# Prevent timeout on model loading
+magicEnabled = false
+installTracer = false
