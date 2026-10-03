@@ -1,0 +1,25 @@
+﻿# Data
+data/raw/*.csv
+data/processed/*.parquet
+
+# Models & Artifacts (large files - use HF Hub instead)
+models/
+artifacts/
+*.pkl
+*.pt
+*.bin
+
+# Logs
+logs/
+*.log
+
+# Python
+__pycache__/
+*.pyc
+.env
+.venv
+venv/
+
+# OS
+.DS_Store
+Thumbs.db
