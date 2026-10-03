@@ -8,6 +8,7 @@ Supports:
 import sys
 import io
 import time
+import os
 from pathlib import Path
 from typing import Optional
 
@@ -19,6 +20,9 @@ import streamlit as st
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
+
+# HF Hub config (set via Streamlit Cloud secrets or env var)
+HF_MODEL_REPO = os.getenv("HF_MODEL_REPO", "Raghulsri9786506332/airline-models")
 
 st.set_page_config(
     page_title="Prediction | Airline Complaint AI",
@@ -72,22 +76,38 @@ st.markdown("""
 # ── Model loading ─────────────────────────────────────────────────────────────
 @st.cache_resource(show_spinner="Loading models …")
 def load_models():
-    """Load the best available severity and risk models + vectorizer."""
+    """Load models from local files or download from Hugging Face Hub."""
     try:
+        # Try local first (for local development)
         tfidf_path = ROOT / "artifacts" / "vectorizers" / "tfidf_vectorizer.pkl"
         sev_model_path = ROOT / "models" / "ml" / "severity_Logistic_Regression_tfidf.pkl"
         risk_model_path = ROOT / "models" / "ml" / "risk_Logistic_Regression_tfidf_struct.pkl"
         struct_scaler_path = ROOT / "artifacts" / "vectorizers" / "struct_scaler.pkl"
 
         models = {}
-        if tfidf_path.exists():
+        all_local = all(p.exists() for p in [tfidf_path, sev_model_path, risk_model_path, struct_scaler_path])
+
+        if all_local:
             models["tfidf"] = joblib.load(tfidf_path)
-        if sev_model_path.exists():
             models["severity_clf"] = joblib.load(sev_model_path)
-        if risk_model_path.exists():
             models["risk_clf"] = joblib.load(risk_model_path)
-        if struct_scaler_path.exists():
             models["struct_scaler"] = joblib.load(struct_scaler_path)
+            st.success("✅ Loaded models from local files")
+        else:
+            # Download from HF Hub (for cloud deployment)
+            from huggingface_hub import hf_hub_download
+            st.info(f"📥 Downloading models from HF Hub: {HF_MODEL_REPO} …")
+            
+            tfidf_file = hf_hub_download(repo_id=HF_MODEL_REPO, filename="tfidf_vectorizer.pkl")
+            sev_file = hf_hub_download(repo_id=HF_MODEL_REPO, filename="severity_Logistic_Regression_tfidf.pkl")
+            risk_file = hf_hub_download(repo_id=HF_MODEL_REPO, filename="risk_Logistic_Regression_tfidf_struct.pkl")
+            scaler_file = hf_hub_download(repo_id=HF_MODEL_REPO, filename="struct_scaler.pkl")
+            
+            models["tfidf"] = joblib.load(tfidf_file)
+            models["severity_clf"] = joblib.load(sev_file)
+            models["risk_clf"] = joblib.load(risk_file)
+            models["struct_scaler"] = joblib.load(scaler_file)
+            st.success("✅ Loaded models from Hugging Face Hub")
 
         return models
     except Exception as e:
