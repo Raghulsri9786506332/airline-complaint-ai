@@ -1,4 +1,4 @@
-# Core
+# Core (minimal for ML inference only)
 pandas>=2.0.0
 numpy>=1.24.0
 scikit-learn>=1.3.0
@@ -7,42 +7,28 @@ joblib>=1.3.0
 
 # NLP & Text Processing
 nltk>=3.8.1
-# spacy>=3.6.0  # Uncomment if using spaCy lemmatizer
 wordcloud>=1.9.0
 
-# Visualization
+# Visualization (for EDA page)
 matplotlib>=3.7.0
 seaborn>=0.12.0
 plotly>=5.15.0
 
-# Deep Learning
-torch>=2.0.0
-# torchtext>=0.15.0  # Uncomment if needed
-
-# Transformers
-transformers>=4.35.0
-datasets>=2.14.0
-tokenizers>=0.14.0
-accelerate>=0.24.0
-
 # Streamlit Application
-streamlit>=1.50.0  # width="stretch" API (use_container_width was removed)
+streamlit>=1.50.0
 
 # Explainability
 lime>=0.2.0.1
-shap>=0.43.0
 
 # Data format
-pyarrow>=13.0.0  # Required for parquet
+pyarrow>=13.0.0
 
-# Optional: AWS Deployment
-# boto3>=1.28.0
-# SQLAlchemy>=2.0.0
-# psycopg2-binary>=2.9.0
-
-# Optional: XGBoost / LightGBM
+# Optional: XGBoost (if risk model uses it)
 xgboost>=1.7.0
-# lightgbm>=4.0.0  # Uncomment if XGBoost is unavailable
 
-# Testing
-pytest>=7.4.0
+# NOTE: Excluded for Streamlit Cloud (1GB RAM, no GPU):
+# - torch, transformers, datasets, tokenizers, accelerate (transformers)
+# - shap (heavy, optional)
+# - boto3, psycopg2, sqlalchemy (AWS deployment)
+# - lightgbm (not used)
+# - pytest (testing)
