@@ -1,6 +1,6 @@
 ﻿# Data
-data/raw/*.csv
 data/processed/*.parquet
+# data/raw/Airline_review.csv  # Allow raw CSV (20MB) for cloud deployment
 
 # Models & Artifacts (large files - use HF Hub instead)
 models/

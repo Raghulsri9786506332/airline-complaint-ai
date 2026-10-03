@@ -131,13 +131,22 @@ st.subheader("📂 Dataset Summary")
 processed_path = ROOT / "data" / "processed" / "airline_processed.parquet"
 raw_path = ROOT / "data" / "raw" / "Airline_review.csv"
 
-if processed_path.exists():
-    df = pd.read_parquet(processed_path)
-else:
+# GitHub raw URL for cloud deployment (data not in repo)
+GITHUB_RAW_URL = "https://github.com/Raghulsri9786506332/airline-complaint-ai/raw/main/data/raw/Airline_review.csv"
+
+@st.cache_data(show_spinner="Loading dataset …")
+def load_dataset():
+    if processed_path.exists():
+        return pd.read_parquet(processed_path)
+    if raw_path.exists():
+        return pd.read_csv(raw_path, encoding="utf-8", on_bad_lines="skip")
+    # Cloud fallback: download from GitHub
     try:
-        df = pd.read_csv(raw_path, encoding="utf-8", on_bad_lines="skip")
+        return pd.read_csv(GITHUB_RAW_URL, encoding="utf-8", on_bad_lines="skip")
     except Exception:
-        df = None
+        return None
+
+df = load_dataset()
 
 if df is not None:
     c1, c2, c3 = st.columns(3)

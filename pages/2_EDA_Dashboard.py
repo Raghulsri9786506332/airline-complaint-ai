@@ -43,6 +43,8 @@ st.markdown("""
 
 
 # ── Load data ─────────────────────────────────────────────────────────────────
+GITHUB_RAW_URL = "https://github.com/Raghulsri9786506332/airline-complaint-ai/raw/main/data/raw/Airline_review.csv"
+
 @st.cache_data(show_spinner="Loading dataset …")
 def load_data() -> pd.DataFrame | None:
     processed = ROOT / "data" / "processed" / "airline_processed.parquet"
@@ -54,7 +56,12 @@ def load_data() -> pd.DataFrame | None:
         df = pd.read_csv(raw, encoding="utf-8", on_bad_lines="skip")
         df["Overall_Rating"] = pd.to_numeric(df["Overall_Rating"], errors="coerce")
     else:
-        return None
+        # Cloud fallback: download from GitHub
+        try:
+            df = pd.read_csv(GITHUB_RAW_URL, encoding="utf-8", on_bad_lines="skip")
+            df["Overall_Rating"] = pd.to_numeric(df["Overall_Rating"], errors="coerce")
+        except Exception:
+            return None
 
     # Add derived columns if missing
     if "severity_label" not in df.columns:
