@@ -107,10 +107,10 @@ with r1c1:
     st.subheader("Severity Distribution")
     if "severity_label" in df_f.columns:
         sev_counts = df_f["severity_label"].value_counts().reindex(SEVERITY_ORDER).fillna(0)
+        sev_df = pd.DataFrame({"Severity": sev_counts.index.tolist(), "Count": sev_counts.values.tolist()})
         fig = px.bar(
-            x=sev_counts.index.tolist(), y=sev_counts.values.tolist(),
-            color=sev_counts.index.tolist(), color_discrete_map=COLORS,
-            labels={"x": "Severity", "y": "Count"},
+            sev_df, x="Severity", y="Count", color="Severity", color_discrete_map=COLORS,
+            labels={"Severity": "Severity", "Count": "Count"},
             title="",
         )
         fig.update_layout(showlegend=False, plot_bgcolor="white", height=320)
@@ -120,9 +120,10 @@ with r1c2:
     st.subheader("Overall Rating Distribution")
     if "Overall_Rating" in df_f.columns:
         rating_counts = df_f["Overall_Rating"].dropna().astype(int).value_counts().sort_index()
+        rating_df = pd.DataFrame({"Rating": rating_counts.index.tolist(), "Count": rating_counts.values.tolist()})
         fig2 = px.bar(
-            x=rating_counts.index.tolist(), y=rating_counts.values.tolist(),
-            labels={"x": "Rating", "y": "Count"},
+            rating_df, x="Rating", y="Count",
+            labels={"Rating": "Rating", "Count": "Count"},
             color_discrete_sequence=["#2563eb"],
         )
         fig2.update_layout(plot_bgcolor="white", height=320)
