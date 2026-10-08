@@ -108,8 +108,8 @@ with r1c1:
     if "severity_label" in df_f.columns:
         sev_counts = df_f["severity_label"].value_counts().reindex(SEVERITY_ORDER).fillna(0)
         fig = px.bar(
-            x=sev_counts.index, y=sev_counts.values,
-            color=sev_counts.index, color_discrete_map=COLORS,
+            x=sev_counts.index.tolist(), y=sev_counts.values.tolist(),
+            color=sev_counts.index.tolist(), color_discrete_map=COLORS,
             labels={"x": "Severity", "y": "Count"},
             title="",
         )
@@ -121,7 +121,7 @@ with r1c2:
     if "Overall_Rating" in df_f.columns:
         rating_counts = df_f["Overall_Rating"].dropna().astype(int).value_counts().sort_index()
         fig2 = px.bar(
-            x=rating_counts.index, y=rating_counts.values,
+            x=rating_counts.index.tolist(), y=rating_counts.values.tolist(),
             labels={"x": "Rating", "y": "Count"},
             color_discrete_sequence=["#2563eb"],
         )
