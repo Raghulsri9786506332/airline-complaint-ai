@@ -43,12 +43,13 @@ def generate_labels(df: pd.DataFrame) -> pd.DataFrame:
     log.info("Generating severity and risk labels …")
 
     # Defensive: ensure Overall_Rating is numeric (handles raw string data)
-    df["Overall_Rating"] = pd.to_numeric(df["Overall_Rating"], errors="coerce")
+    rating = df.get("Overall_Rating", pd.Series(np.nan, index=df.index))
+    df["Overall_Rating"] = pd.to_numeric(rating, errors="coerce")
 
     # Build combined text for keyword scanning
-    df["_text"] = (
-        df["Review_Title"].fillna("") + " " + df["Review"].fillna("")
-    ).str.lower()
+    title = df.get("Review_Title", pd.Series("", index=df.index)).fillna("")
+    review = df.get("Review", pd.Series("", index=df.index)).fillna("")
+    df["_text"] = (title.astype(str) + " " + review.astype(str)).str.lower()
 
     df["severity_label"] = df.apply(_assign_severity, axis=1)
     df["severity_id"] = df["severity_label"].map(

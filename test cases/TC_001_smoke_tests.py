@@ -40,8 +40,8 @@ class TestSmokeImports:
 
     def test_sm003_data_loader_imports(self):
         """TC-SM-003: src.data.data_loader imports without error."""
-        from src.data.data_loader import load_raw_data
-        assert callable(load_raw_data)
+        from src.data.data_loader import load_raw_dataset
+        assert callable(load_raw_dataset)
 
     def test_sm004_cleaner_imports(self):
         """TC-SM-004: src.data.cleaner imports all public functions."""

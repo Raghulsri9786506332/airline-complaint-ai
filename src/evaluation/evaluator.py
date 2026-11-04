@@ -111,12 +111,13 @@ def build_comparison_table(results: list[dict]) -> pd.DataFrame:
     """
     rows = []
     for r in results:
+        accuracy = r.get("accuracy")
         rows.append({
             "Model": r.get("model"),
             "Task": r.get("task"),
             "Model Family": r.get("model_family", r.get("family", "ML")),
             "Feature / Input": r.get("feature"),
-            "Accuracy": round(r.get("accuracy", r.get("roc_auc", 0)), 4),
+            "Accuracy": round(accuracy, 4) if accuracy is not None else np.nan,
             "Macro F1": round(r.get("macro_f1", r.get("f1", 0)), 4),
             "Recall": round(r.get("macro_recall", r.get("recall", 0)), 4),
             "ROC-AUC": round(r.get("roc_auc", 0), 4),

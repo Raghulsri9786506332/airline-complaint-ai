@@ -23,11 +23,12 @@ def highlight_complaint_phrases(text: str) -> dict:
     Returns a dict with highlighted spans and a cleaned list.
     """
     ALL_KW = set(CRITICAL_KEYWORDS + RISK_KEYWORDS)
+    lowered_text = text.lower()
     found = []
-    for kw in ALL_KW:
-        if kw in text.lower():
-            found.append(kw)
-    return {"complaint_phrases": sorted(set(found)), "text": text}
+    for keyword in sorted(ALL_KW, key=lambda item: (-len(item), item)):
+        if keyword in lowered_text and not any(keyword in longer for longer in found):
+            found.append(keyword)
+    return {"complaint_phrases": sorted(found), "text": text}
 
 
 # ── 2. Linear-model top features ─────────────────────────────────────────────

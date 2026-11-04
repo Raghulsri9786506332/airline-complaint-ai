@@ -14,6 +14,7 @@ from functools import lru_cache
 from typing import Optional
 
 import nltk
+import pandas as pd
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
@@ -27,6 +28,11 @@ for pkg in ["punkt", "punkt_tab", "stopwords", "wordnet", "omw-1.4"]:
 
 _STOP_WORDS = set(stopwords.words("english"))
 _LEMMATIZER = WordNetLemmatizer()
+_NEGATION_CONTRACTIONS = (
+    (re.compile(r"\bcan't\b", re.IGNORECASE), "can not"),
+    (re.compile(r"\bwon't\b", re.IGNORECASE), "will not"),
+    (re.compile(r"\bshan't\b", re.IGNORECASE), "shall not"),
+)
 
 # ── Shared low-level cleaner ────────────────────────────────────────────────
 
@@ -38,6 +44,9 @@ def _base_clean(text: str) -> str:
     text = text.encode("utf-8", errors="replace").decode("utf-8")
     # HTML unescape
     text = html.unescape(text)
+    for pattern, replacement in _NEGATION_CONTRACTIONS:
+        text = pattern.sub(replacement, text)
+    text = re.sub(r"\b([a-z]+)n't\b", r"\1 not", text, flags=re.IGNORECASE)
     # Remove HTML tags
     text = re.sub(r"<[^>]+>", " ", text)
     # Remove URLs
@@ -63,7 +72,10 @@ def ml_clean(text: str, lemmatize: bool = True) -> str:
     """
     text = _base_clean(text).lower()
     tokens = word_tokenize(text)
-    tokens = [t for t in tokens if t.isalpha() and t not in _STOP_WORDS]
+    tokens = [
+        t for t in tokens
+        if t.isalpha() and (t not in _STOP_WORDS or t in {"no", "not", "never"})
+    ]
     if lemmatize:
         tokens = [_LEMMATIZER.lemmatize(t) for t in tokens]
     return " ".join(tokens)
@@ -108,7 +120,9 @@ def build_full_text(
         review   : Review field value.
         pipeline : 'ml' | 'dl' | 'transformer'
     """
-    combined = (str(title or "") + " " + str(review or "")).strip()
+    title_text = "" if title is None or pd.isna(title) else str(title)
+    review_text = "" if review is None or pd.isna(review) else str(review)
+    combined = (title_text + " " + review_text).strip()
     if pipeline == "ml":
         return ml_clean(combined)
     elif pipeline == "dl":

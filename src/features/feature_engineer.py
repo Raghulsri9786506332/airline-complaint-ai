@@ -45,6 +45,40 @@ def add_structured_features(df: pd.DataFrame, raw_text_col: str = "full_review_t
     return df
 
 
+def count_keywords(text: str) -> int:
+    """Count distinct complaint and risk keywords, matching training features."""
+    from src.utils.config import CRITICAL_KEYWORDS, RISK_KEYWORDS
+    text = "" if pd.isna(text) else str(text).lower()
+    return sum(1 for keyword in set(CRITICAL_KEYWORDS + RISK_KEYWORDS) if keyword in text)
+
+
+def build_inference_struct(
+    title: str,
+    review: str,
+    ratings: dict | None,
+    scaler: StandardScaler,
+) -> np.ndarray:
+    """Build and scale one structured-feature row using the training column order."""
+    ratings = ratings or {}
+    title = "" if pd.isna(title) else str(title)
+    review = "" if pd.isna(review) else str(review)
+    full_text = f"{title} {review}"
+    row = []
+    for index, column in enumerate(STRUCTURED_COLS):
+        if column in RATING_COLS:
+            value = ratings.get(column)
+            row.append(
+                float(value)
+                if value is not None and not pd.isna(value) and value != 0
+                else float(scaler.mean_[index])
+            )
+        elif column == "review_length":
+            row.append(float(len(full_text)))
+        elif column == "keyword_count":
+            row.append(float(count_keywords(full_text)))
+    return scaler.transform(np.asarray([row], dtype=np.float32))
+
+
 def get_structured_matrix(df: pd.DataFrame, scaler: StandardScaler | None = None,
                            fit: bool = False) -> tuple[np.ndarray, StandardScaler]:
     """
